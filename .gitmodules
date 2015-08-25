@@ -1,0 +1,6 @@
+[submodule "blingbling"]
+	path = blingbling
+	url = https://github.com/cedlemo/blingbling.git
+[submodule "khal"]
+	path = khal
+	url = https://github.com/geier/khal.git
