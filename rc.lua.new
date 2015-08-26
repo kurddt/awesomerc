@@ -13,7 +13,7 @@ naughty = require("naughty")
 local menubar = require("menubar")
 scheduler = require("scheduler")
 utility = require("utility")
-blingbling = require("blingbling")
+
 
 
 
@@ -140,6 +140,7 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 
 -- {{{ Wibox
 -- Create a textclock blingbling widget
+blingbling = require("blingbling")
 mytextclock = blingbling.calendar()
 mytextclock:set_link_to_external_calendar(true)
 
