@@ -100,6 +100,36 @@ theme.icon_theme = nil
 theme.bg_onscreen   = "#222255AA"
 theme.fg_onscreen   = "#227f7f55"
 
+
+-- Calendar theme
+theme.blingbling = {
+   calendar = {
+	  prev_next_widget_style = {
+		 text_color = "#00FF00"
+	  },
+	  current_day_widget_style = {
+		 text_color = "#FF0000"
+	  },
+	  weeks_number_widget_style = {
+		 text_color = "#0000FF"
+	  },
+	  days_of_week_widget_style = {
+		 text_color = "#0000FF"
+	  },
+	  current_date_widget_style = {
+		 text_color = "#00FF00"
+	  },
+	  corner_widget_style = {
+		 text_color = "#0000FF"
+	  },
+	  info_cell_style = {
+		 text_color = "#4466FF"
+	  },
+	  focus_widget_style = {
+		 text_color = "#4466FF"
+	  }
+   }
+}
 -- Configure naughty
 if naughty then
    local presets = naughty.config.presets
