@@ -72,4 +72,4 @@ fileext = .ics
 type = caldav
 url = https://mail.kalray.eu/dav/glager@kalray.eu/Calendar
 username = glager
-
+password = nous!2603

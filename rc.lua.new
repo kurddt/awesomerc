@@ -13,6 +13,7 @@ naughty = require("naughty")
 local menubar = require("menubar")
 scheduler = require("scheduler")
 utility = require("utility")
+vicious = require("vicious")
 
 
 
@@ -55,23 +56,9 @@ awful.util.spawn_with_shell("xcompmgr -cF &")
 -- Themes define colours, icons, and wallpapers
 beautiful.init(awful.util.getdir("config") .. "/themes/conscience/theme2.lua")
 
-beautiful.onscreen.init()
---beautiful.init("/usr/share/awesome/themes/default/theme.lua")
---theme = {}
---theme.theme_dir = awful.util.getdir("config") .. "/themes/conscience"
---local onscreen_file = theme.theme_dir ..  "/onscreen.lua"
---theme.bg_onscreen   = "#222222AA"
-
---if awful.util.file_readable(onscreen_file) then
-
---  onscreen = dofile(onscreen_file)   
---else
---   error("E: beautiful: file not found: " .. onscreen_file)
---end
---onscreen.init()
 
 -- This is used later as the default terminal and editor to run.
-terminal = "terminology.sh"
+terminal = "terminology"
 editor = os.getenv("EDITOR") or "emacs"
 
 editor_cmd = terminal .. " -e " .. editor
@@ -115,7 +102,7 @@ end
 tags = {}
 for s = 1, screen.count() do
     -- Each screen has its own tag table.
-    tags[s] = awful.tag({ 1, 2, 3, 4, 5, 6, 7, 8, 9 }, s, layouts[1])
+    tags[s] = awful.tag({ "W3", "dev", "tremornet", "commander", 5, 6, 7, 8, 9 }, s, layouts[1])
 end
 -- }}}
 
@@ -141,30 +128,58 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- {{{ Wibox
 -- Create a textclock blingbling widget
 blingbling = require("blingbling")
-mytextclock = blingbling.calendar()
-mytextclock:set_link_to_external_calendar(true)
+mytextclock = blingbling.calendar.new({type = "textbox", text = "calendar"})
+
+myvolume = blingbling.volume.new({ cmd = "amixer", pulseaudio = true, label = "$percent%", graph_color = "#005500" })
+myvolume:set_height(18)
+ myvolume:set_width(30)
+ --bind the volume widget on the master channel
+ myvolume:update_master()
+ myvolume:set_master_control()
+ myvolume:set_bar(true)
+
+ --mpd
+ local mpd_shift = 1
+ mpdwidget = wibox.widget.textbox()
+ mpdwidget:set_font("Ubuntu Mono 9")
+ -- Register widget
+ vicious.register(mpdwidget, vicious.widgets.mpd,
+				  function (mpdwidget, args)
+					 if args["{state}"] == "Stop" then 
+						return " - "
+					 else		   
+						song = args["{Artist}"]..' - '.. args["{Title}"]
+						if string.len(song) > 40 then
+						   if mpd_shift + 40 > string.len(song) then
+							  mpd_shift = 0
+						   else
+							  mpd_shift = mpd_shift + 1
+						   end	
+						   song = string.sub(song, mpd_shift, mpd_shift + 40)
+						end
+						return song
+					 end
+				  end, 1)
 
 local function get_from_khal(day, month, year)
    --os.execute("vdirsyncer sync")
-   local cmd = 'khal agenda --days 1 ' .. day .. '.' .. month .. '.' .. year
+   local cmd = 'PYTHONPATH=/work1/glager/local/ khal agenda --days 1 ' .. day .. '.' .. month .. '.' .. year
    local file = assert(io.popen(cmd, 'r'))
    local output = file:read('*all')
    file:close()
-   --print(output)
-   --naughty.notify({ text = "do agenda " ..  cmd})
+   print(output)
+   --naughty.notify({ text = "do agenda " ..  cmd .. output})
    return output
 end
 
 function default_khal()
-   local cmd = 'khal agenda --days 5'
+   local cmd = 'PYTHONPATH=/work1/glager/local/ khal agenda --days 5'
    local file = assert(io.popen(cmd, 'r'))
    local output = file:read('*all')
    file:close()
+   --naughty.notify({ text = "do agenda " ..  cmd .. output})
    return output
 end
-
-mytextclock:clear_and_add_function_get_events_from(get_from_khal)
-mytextclock:set_default_info(default_khal)
 
 -- Create a wibox for each screen and add it
 mywibox = {}
@@ -243,8 +258,12 @@ for s = 1, screen.count() do
     -- Widgets that are aligned to the right
     local right_layout = wibox.layout.fixed.horizontal()
     if s == 1 then right_layout:add(wibox.widget.systray()) end
+	if s == 2 then right_layout:add(mpdwidget) end
+	right_layout:add(myvolume)
     right_layout:add(mytextclock)
+	
     right_layout:add(mylayoutbox[s])
+
 
     -- Now bring it all together (with the tasklist in the middle)
     local layout = wibox.layout.align.horizontal()
@@ -320,15 +339,27 @@ awful.key({ modkey, "Control"   }, "Right",
     awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1)         end),
     awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end),
     awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
-	awful.key({ modkey,  }, "e", function () awful.util.spawn("/work1/glager/eclipse/eclipse") end),
-	awful.key({ modkey,  }, "d", function () awful.util.spawn("dolphin") end),
+	awful.key({ modkey,  }, "e", function () awful.util.spawn("/work1/glager/toolchain/eclipse/eclipse") end),
+	awful.key({ modkey,  }, "n", function () awful.util.spawn("nautilus") end),
 	awful.key({ modkey,  }, "c", function () awful.util.spawn("gnome-calculator") end),
 	awful.key({ modkey,  }, "f", function () awful.util.spawn("firefox") end),
+	awful.key({ modkey,  }, "t", function () awful.util.spawn("thunderbird") end),
+	awful.key({ modkey,  }, "s", function () awful.util.spawn("slack") end),
     awful.key({ modkey, "Control" }, "n", awful.client.restore),
     awful.key({ modkey, "Control" }, "s", function () awful.util.spawn("xscreensaver-command -lock") end),
 
     -- Prompt
     awful.key({ modkey },            "r",     function () mypromptbox[mouse.screen]:run() end),
+
+	awful.key({ modkey, "Shift",  }, "F2",    function ()
+			awful.prompt.run({ prompt = "Rename tab: ", text = awful.tag.selected().name, },
+			mypromptbox[mouse.screen].widget,
+			function (s)
+			   for i = 1, screen.count() do			   
+				awful.tag.selected(i).name = s
+				end
+			end )
+	end),
 
     awful.key({ modkey }, "0",
               function ()
@@ -404,6 +435,7 @@ clientbuttons = awful.util.table.join(
     awful.button({ modkey }, 3, awful.mouse.client.resize))
 
 -- Set keys
+-- musicwidget:append_global_keys()
 root.keys(globalkeys)
 -- }}}
 
@@ -499,6 +531,6 @@ client.connect_signal("manage", function (c, startup)
     end
 end)
 
-client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
-client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
+--client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
+--client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
 -- }}}

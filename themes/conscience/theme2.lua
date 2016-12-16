@@ -111,24 +111,26 @@ theme.blingbling = {
 		 text_color = "#FF0000"
 	  },
 	  weeks_number_widget_style = {
-		 text_color = "#0000FF"
+		 text_color = "#7777FF"
 	  },
 	  days_of_week_widget_style = {
-		 text_color = "#0000FF"
+		 text_color = "#7777FF"
 	  },
 	  current_date_widget_style = {
 		 text_color = "#00FF00"
 	  },
 	  corner_widget_style = {
-		 text_color = "#0000FF"
+		 text_color = "#7777FF"
 	  },
 	  info_cell_style = {
-		 text_color = "#4466FF"
+		 text_color = "#6688FF",
+		 background_color = "#222222",
+		 backgroud_text_color = "#222222"
 	  },
 	  focus_widget_style = {
-		 text_color = "#4466FF"
+		 text_color = "#6688FF"
 	  }
-   }
+  }
 }
 -- Configure naughty
 if naughty then
@@ -150,7 +152,7 @@ local onscreen_file = theme.theme_dir ..  "/onscreen.lua"
 awful.widget.layout = 3
 
 if awful.util.file_readable(onscreen_file) then
-  theme.onscreen = dofile(onscreen_file)   
+   --theme.onscreen = dofile(onscreen_file)   
 else
    error("E: beautiful: file not found: " .. onscreen_file)
 end

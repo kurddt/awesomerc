@@ -4,3 +4,6 @@
 [submodule "khal"]
 	path = khal
 	url = https://github.com/geier/khal.git
+[submodule "vicious"]
+	path = vicious
+	url = http://git.sysphere.org/vicious
