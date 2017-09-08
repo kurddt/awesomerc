@@ -54,7 +54,7 @@ awful.util.spawn_with_shell("xcompmgr -cF &")
 
 -- {{{ Variable definitions
 -- Themes define colours, icons, and wallpapers
-beautiful.init(awful.util.getdir("config") .. "/themes/conscience/theme2.lua")
+beautiful.init(awful.util.get_themes_dir() .. "default/theme.lua")
 
 
 -- This is used later as the default terminal and editor to run.
@@ -97,20 +97,11 @@ if beautiful.wallpaper then
 end
 -- }}}
 
--- {{{ Tags
--- Define a tag table which hold all screen tags.
-tags = {}
-for s = 1, screen.count() do
-    -- Each screen has its own tag table.
-    tags[s] = awful.tag({ "W3", "dev", "tremornet", "commander", 5, 6, 7, 8, 9 }, s, layouts[1])
-end
--- }}}
-
 -- {{{ Menu
 -- Create a laucher widget and a main menu
 myawesomemenu = {
    { "restart", awesome.restart },
-   { "quit", awesome.quit }
+   { "quit", function() awesome.quit() end }
 }
 
 mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
@@ -127,39 +118,39 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 
 -- {{{ Wibox
 -- Create a textclock blingbling widget
-blingbling = require("blingbling")
-mytextclock = blingbling.calendar.new({type = "textbox", text = "calendar"})
+-- blingbling = require("blingbling")
+mytextclock = wibox.widget.textclock()
 
-myvolume = blingbling.volume.new({ cmd = "amixer", pulseaudio = true, label = "$percent%", graph_color = "#005500" })
-myvolume:set_height(18)
- myvolume:set_width(30)
+-- myvolume = blingbling.volume.new({ cmd = "amixer", pulseaudio = true, label = "$percent%", graph_color = "#005500" })
+-- myvolume:set_height(18)
+--  myvolume:set_width(30)
  --bind the volume widget on the master channel
- myvolume:update_master()
- myvolume:set_master_control()
- myvolume:set_bar(true)
+--  myvolume:update_master()
+-- myvolume:set_master_control()
+--  myvolume:set_bar(true)
 
  --mpd
  local mpd_shift = 1
  mpdwidget = wibox.widget.textbox()
  mpdwidget:set_font("Ubuntu Mono 9")
- -- Register widget
- vicious.register(mpdwidget, vicious.widgets.mpd,
-				  function (mpdwidget, args)
-					 if args["{state}"] == "Stop" then 
-						return " - "
-					 else		   
-						song = args["{Artist}"]..' - '.. args["{Title}"]
-						if string.len(song) > 40 then
-						   if mpd_shift + 40 > string.len(song) then
-							  mpd_shift = 0
-						   else
-							  mpd_shift = mpd_shift + 1
-						   end	
-						   song = string.sub(song, mpd_shift, mpd_shift + 40)
-						end
-						return song
-					 end
-				  end, 1)
+-- Register widget
+-- vicious.register(mpdwidget, vicious.widgets.mpd,asd
+--				  function (mpdwidget, args)
+--					 if args["{state}"] == "Stop" then 
+--						return " - "
+--					 else		   
+--						song = tostring(args["{Artist}"]) ..' - '.. tostring(args["{Title}"])
+--						if string.len(song) > 40 then
+--						   if mpd_shift + 40 > string.len(song) then
+--							  mpd_shift = 0
+--						   else
+--							  mpd_shift = mpd_shift + 1
+--						   end	
+--						   song = string.sub(song, mpd_shift, mpd_shift + 40)
+--						end
+--						return song
+--					 end
+--				  end, 1)
 
 local function get_from_khal(day, month, year)
    --os.execute("vdirsyncer sync")
@@ -229,50 +220,83 @@ mytasklist.buttons = awful.util.table.join(
                                               if client.focus then client.focus:raise() end
                                           end))
 
-for s = 1, screen.count() do
+
+local function set_wallpaper(s)
+    -- Wallpaper
+    if beautiful.wallpaper then
+        local wallpaper = beautiful.wallpaper
+        -- If wallpaper is a function, call it with the screen
+        if type(wallpaper) == "function" then
+            wallpaper = wallpaper(s)
+        end
+        gears.wallpaper.maximized(wallpaper, s, true)
+    end
+end
+
+screen.connect_signal("property::geometry", set_wallpaper)
+
+awful.screen.connect_for_each_screen(function(s)
+
+	  set_wallpaper(s)
+
+	  awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
+	  
     -- Create a promptbox for each screen
-    mypromptbox[s] = awful.widget.prompt()
+    s.mypromptbox = awful.widget.prompt()
     -- Create an imagebox widget which will contains an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
-    mylayoutbox[s] = awful.widget.layoutbox(s)
-    mylayoutbox[s]:buttons(awful.util.table.join(
+    s.mylayoutbox = awful.widget.layoutbox(s)
+    s.mylayoutbox:buttons(awful.util.table.join(
                            awful.button({ }, 1, function () awful.layout.inc(layouts, 1) end),
                            awful.button({ }, 3, function () awful.layout.inc(layouts, -1) end),
                            awful.button({ }, 4, function () awful.layout.inc(layouts, 1) end),
                            awful.button({ }, 5, function () awful.layout.inc(layouts, -1) end)))
     -- Create a taglist widget
-    mytaglist[s] = awful.widget.taglist(s, awful.widget.taglist.filter.all, mytaglist.buttons)
+    s.mytaglist = awful.widget.taglist(s, awful.widget.taglist.filter.all, mytaglist.buttons)
 
     -- Create a tasklist widget
-    mytasklist[s] = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, mytasklist.buttons)
+    s.mytasklist = awful.widget.tasklist(s, awful.widget.tasklist.filter.currenttags, mytasklist.buttons)
 
     -- Create the wibox
-    mywibox[s] = awful.wibox({ position = "top", screen = s })
+    s.mywibox = awful.wibox({ position = "top", screen = s })
 
-    -- Widgets that are aligned to the left
-    local left_layout = wibox.layout.fixed.horizontal()
-    left_layout:add(mylauncher)
-    left_layout:add(mytaglist[s])
-    left_layout:add(mypromptbox[s])
-
-    -- Widgets that are aligned to the right
-    local right_layout = wibox.layout.fixed.horizontal()
-    if s == 1 then right_layout:add(wibox.widget.systray()) end
-	if s == 2 then right_layout:add(mpdwidget) end
-	right_layout:add(myvolume)
-    right_layout:add(mytextclock)
+ 	if s == 1 then
+	   s.mywibox:setup {
+		  layout = wibox.layout.align.horizontal,
+		  { -- Left widgets
+			 layout = wibox.layout.fixed.horizontal,
+			 mylauncher,
+			 s.mytaglist,
+			 s.mypromptbox,
+		  },
+		  s.mytasklist, -- Middle widget
+		  { -- Right widgets
+			 layout = wibox.layout.fixed.horizontal,
+			 wibox.widget.systray(),
+			 mytextclock,
+			 s.mylayoutbox,
+		  },
+	   }
+	else
+	   s.mywibox:setup {
+		  layout = wibox.layout.align.horizontal,
+		  { -- Left widgets
+			 layout = wibox.layout.fixed.horizontal,
+			 mylauncher,
+			 s.mytaglist,
+			 s.mypromptbox,
+		  },
+		  s.mytasklist, -- Middle widget
+		  { -- Right widgets
+			 layout = wibox.layout.fixed.horizontal,
+			 wibox.widget.systray(),
+			 mytextclock,
+			 s.mylayoutbox,
+		  },
+	   }
+	end	
 	
-    right_layout:add(mylayoutbox[s])
-
-
-    -- Now bring it all together (with the tasklist in the middle)
-    local layout = wibox.layout.align.horizontal()
-    layout:set_left(left_layout)
-    layout:set_middle(mytasklist[s])
-    layout:set_right(right_layout)
-
-    mywibox[s]:set_widget(layout)
-end
+end)
 -- }}}
 
 -- {{{ Mouse bindings
@@ -339,7 +363,7 @@ awful.key({ modkey, "Control"   }, "Right",
     awful.key({ modkey, "Control" }, "l",     function () awful.tag.incncol(-1)         end),
     awful.key({ modkey,           }, "space", function () awful.layout.inc(layouts,  1) end),
     awful.key({ modkey, "Shift"   }, "space", function () awful.layout.inc(layouts, -1) end),
-	awful.key({ modkey,  }, "e", function () awful.util.spawn("/work1/glager/toolchain/eclipse/eclipse") end),
+	awful.key({ modkey,  }, "e", function () awful.util.spawn("/work1/glager/toolchain/eclipse/eclipse/eclipse") end),
 	awful.key({ modkey,  }, "n", function () awful.util.spawn("nautilus") end),
 	awful.key({ modkey,  }, "c", function () awful.util.spawn("gnome-calculator") end),
 	awful.key({ modkey,  }, "f", function () awful.util.spawn("firefox") end),
@@ -349,11 +373,11 @@ awful.key({ modkey, "Control"   }, "Right",
     awful.key({ modkey, "Control" }, "s", function () awful.util.spawn("xscreensaver-command -lock") end),
 
     -- Prompt
-    awful.key({ modkey },            "r",     function () mypromptbox[mouse.screen]:run() end),
+    awful.key({ modkey },            "r",     function () mouse.screen.mypromptbox:run() end),
 
 	awful.key({ modkey, "Shift",  }, "F2",    function ()
 			awful.prompt.run({ prompt = "Rename tab: ", text = awful.tag.selected().name, },
-			mypromptbox[mouse.screen].widget,
+			mouse.screen.mypromptbox.widget,
 			function (s)
 			   for i = 1, screen.count() do			   
 				awful.tag.selected(i).name = s
@@ -447,8 +471,9 @@ awful.rules.rules = {
                      border_color = beautiful.border_normal,
                      focus = awful.client.focus.filter,
                      keys = clientkeys,
-		      maximized_vertical = false,
+					 maximized_vertical = false,
                      maximized_horizontal = false,
+					 size_hints_honor = false,
                      buttons = clientbuttons } },
     { rule = { class = "MPlayer" },
       properties = { floating = true } },
@@ -530,6 +555,52 @@ client.connect_signal("manage", function (c, startup)
         awful.titlebar(c):set_widget(layout)
     end
 end)
+
+local function warp_mouse(screen)
+   c = client.focus
+   naughty.notify({ preset = naughty.config.presets.critical,
+                     title = "Wraping",
+                     text = awesome.startup_errors })
+    if c then
+        local g = c:geometry()
+        mouse.coords { x = g.x + 5, y = g.y + 5 }
+    end
+end
+
+--for s = 1, screen.count() do
+--    screen[s]:add_signal("arrange", function (screen)
+--        warp_mouse(screen)
+--    end)
+--end
+
+tag.connect_signal(
+"property::selected",
+  function (t)
+    local selected = tostring(t.selected) == "false"
+    if selected then
+     local focus_timer = timer({ timeout = 1 })
+     focus_timer:connect_signal("timeout", function()
+    local c = awful.mouse.client_under_pointer()
+    if not (c == nil) then
+      client.focus = c
+      c:raise()
+    end
+    focus_timer:stop()
+  end)
+  focus_timer:start()
+ end
+end)
+
+local mouse_moving = false
+
+--client.connect_signal("focus", function(c)
+--	 if c then
+--      if mouse_moving == false then
+--	   local g = c:geometry()
+--	   mouse.coords { x = g.x + g.width/2, y = g.y + g.height/2 }
+--	  end
+--	 end	
+--end)
 
 --client.connect_signal("focus", function(c) c.border_color = beautiful.border_focus end)
 --client.connect_signal("unfocus", function(c) c.border_color = beautiful.border_normal end)
