@@ -4,3 +4,10 @@
 [submodule "vicious"]
 	path = vicious
 	url = http://git.sysphere.org/vicious
+[submodule "lain"]
+	path = lain
+	url = git://github.com/copycat-killer/lain.git
+
+[submodule "freedesktop"]
+	path = freedesktop
+	url = git://github.com/copycat-killer/awesome-freedesktop.git
