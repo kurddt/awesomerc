@@ -131,13 +131,17 @@ scissors:buttons(awful.util.table.join(awful.button({}, 1, function() awful.spaw
 
 -- Mail IMAP check
 local mailicon = wibox.widget.imagebox(theme.widget_mail)
---[[ commented because it needs to be set before use
+--[[ commented because it needs to be set before use ]]--
 mailicon:buttons(awful.util.table.join(awful.button({ }, 1, function () awful.spawn(mail) end)))
 local mail = lain.widget.imap({
     timeout  = 180,
-    server   = "server",
-    mail     = "mail",
-    password = "keyring get mail",
+    server   = "imap.googlemail.com",
+    mail     = "guillaume.lager@gmail.com",
+    password = function()
+	   local pass =  io.popen("pass Mail/gmail")
+	   local password = pass:read()
+	   pass:close()
+    end,
     settings = function()
         if mailcount > 0 then
             widget:set_text(" " .. mailcount .. " ")
@@ -148,13 +152,45 @@ local mail = lain.widget.imap({
         end
     end
 })
---]]
 
 -- ALSA volume
-theme.volume = lain.widget.alsabar({
-    --togglechannel = "IEC958,3",
-    notification_preset = { font = "xos4 Terminus 10", fg = theme.fg_normal },
+local volicon = wibox.widget.imagebox(theme.widget_vol)
+theme.volume = lain.widget.alsa({
+    settings = function()
+        if volume_now.status == "off" then
+            volicon:set_image(theme.widget_vol_mute)
+        elseif tonumber(volume_now.level) == 0 then
+            volicon:set_image(theme.widget_vol_no)
+        elseif tonumber(volume_now.level) <= 50 then
+            volicon:set_image(theme.widget_vol_low)
+        else
+            volicon:set_image(theme.widget_vol)
+        end
+
+        widget:set_markup(markup.font(theme.font, " " .. volume_now.level .. "% "))
+    end
 })
+theme.volume.widget:buttons(awful.util.table.join(
+    awful.button({}, 1, function() -- left click
+        awful.spawn(string.format("%s -e alsamixer", awful.util.terminal))
+    end),
+    awful.button({}, 2, function() -- middle click
+        awful.spawn(string.format("%s set %s 100%%", theme.volume.cmd, theme.volume.channel))
+        theme.volume.update()
+    end),
+    awful.button({}, 3, function() -- right click
+        awful.spawn(string.format("%s set %s toggle", theme.volume.cmd, theme.volume.togglechannel or theme.volume.channel))
+        theme.volume.update()
+    end),
+    awful.button({}, 4, function() -- scroll up
+        awful.spawn(string.format("%s set %s 1%%+", theme.volume.cmd, theme.volume.channel))
+        theme.volume.update()
+    end),
+    awful.button({}, 5, function() -- scroll down
+        awful.spawn(string.format("%s set %s 1%%-", theme.volume.cmd, theme.volume.channel))
+        theme.volume.update()
+    end)
+))
 
 -- MPD
 local musicplr = awful.util.terminal .. " -title Music -g 130x34-320+16 -e ncmpcpp"
@@ -223,7 +259,7 @@ local temp = lain.widget.temp({
     end
 })
 --]]
-local tempicon = wibox.widget.imagebox(theme.widget_temp)
+-- local tempicon = wibox.widget.imagebox(theme.widget_temp)
 
 -- / fs
 local fsicon = wibox.widget.imagebox(theme.widget_hdd)
@@ -365,12 +401,12 @@ function theme.at_screen_connect(s)
             arrow("#777E76", "#4B696D"),
             wibox.container.background(wibox.container.margin(wibox.widget { cpuicon, cpu.widget, layout = wibox.layout.align.horizontal }, 3, 4), "#4B696D"),
             arrow("#4B696D", "#4B3B51"),
-            wibox.container.background(wibox.container.margin(wibox.widget { tempicon, temp.widget, layout = wibox.layout.align.horizontal }, 4, 4), "#4B3B51"),
+            wibox.container.background(wibox.container.margin(wibox.widget { volicon, theme.volume.widget, layout = wibox.layout.align.horizontal }, 4, 4), "#4B3B51"),
             arrow("#4B3B51", "#CB755B"),
             wibox.container.background(wibox.container.margin(wibox.widget { fsicon, theme.fs.widget, layout = wibox.layout.align.horizontal }, 3, 3), "#CB755B"),
-            arrow("#CB755B", "#8DAA9A"),
-            wibox.container.background(wibox.container.margin(wibox.widget { baticon, bat.widget, layout = wibox.layout.align.horizontal }, 3, 3), "#8DAA9A"),
-            arrow("#8DAA9A", "#C0C0A2"),
+--            arrow("#CB755B", "#8DAA9A"),
+--            wibox.container.background(wibox.container.margin(wibox.widget { baticon, bat.widget, layout = wibox.layout.align.horizontal }, 3, 3), "#8DAA9A"),
+            arrow("#CB755B", "#C0C0A2"),
             wibox.container.background(wibox.container.margin(wibox.widget { nil, neticon, net.widget, layout = wibox.layout.align.horizontal }, 3, 3), "#C0C0A2"),
             arrow("#C0C0A2", "#777E76"),
             wibox.container.background(wibox.container.margin(binclock.widget, 4, 8), "#777E76"),
