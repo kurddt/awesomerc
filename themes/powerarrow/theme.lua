@@ -134,10 +134,10 @@ local mailicon = wibox.widget.imagebox(theme.widget_mail)
 mailicon:buttons(awful.util.table.join(awful.button({ }, 1, function () awful.spawn(mail) end)))
 local mail = lain.widget.imap({
     timeout  = 180,
-    server   = "imap.googlemail.com",
-    mail     = "guillaume.lager@gmail.com",
+    server   = "imap.transip.email",
+    mail     = "g.lager@innoseis.com",
     password = function()
-	   local pass =  io.popen("pass Mail/gmail")
+	   local pass =  io.popen("pass Mail/innoseis")
 	   local password = pass:read()
 	   pass:close()
     end,
