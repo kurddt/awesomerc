@@ -107,10 +107,10 @@ mytextclock.font = theme.font
 
 -- Calendar
 theme.cal = lain.widget.calendar({
-    --cal = "cal --color=always",
+    cal = "ncal -b -h",
     attach_to = { mytextclock },
     notification_preset = {
-        font = "xos4 Terminus 10",
+        font = "Terminus 10",
         fg   = theme.fg_normal,
         bg   = theme.bg_normal
     }
@@ -140,6 +140,7 @@ local mail = lain.widget.imap({
 	   local pass =  io.popen("pass Mail/innoseis")
 	   local password = pass:read()
 	   pass:close()
+	   return password
     end,
     settings = function()
         if mailcount > 0 then
