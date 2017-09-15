@@ -16,7 +16,7 @@ local theme                                     = {}
 theme.dir                                       = os.getenv("HOME") .. "/.config/awesome/themes/powerarrow"
 theme.wallpaper                                 = theme.dir .. "/wall.png"
 theme.font                                      = "xos4 Terminus 9"
-theme.fg_normal                                 = "#FEFEFE"
+theme.fg_normal                                 = "#FBFBFB"
 theme.fg_focus                                  = "#32D6FF"
 theme.fg_urgent                                 = "#C83F11"
 theme.bg_normal                                 = "#222222"
@@ -98,18 +98,17 @@ theme.titlebar_maximized_button_normal_inactive = theme.dir .. "/icons/titlebar/
 local markup = lain.util.markup
 local separators = lain.util.separators
 
--- Binary clock
-local binclock = require("themes.powerarrow.binclock"){
-    height = 16,
-    show_seconds = true,
-    color_active = theme.fg_normal,
-    color_inactive = theme.bg_focus
-}
+
+-- Textclock
+os.setlocale(os.getenv("LANG")) -- to localize the clock
+local clockicon = wibox.widget.imagebox(theme.widget_clock)
+local mytextclock = wibox.widget.textclock(markup(theme.fg_normal, "%A %d %B ") .. markup("#8a97b5", ">") .. markup("#de9069", " %H:%M "))
+mytextclock.font = theme.font
 
 -- Calendar
 theme.cal = lain.widget.calendar({
     --cal = "cal --color=always",
-    attach_to = { binclock.widget },
+    attach_to = { mytextclock },
     notification_preset = {
         font = "xos4 Terminus 10",
         fg   = theme.fg_normal,
@@ -409,7 +408,7 @@ function theme.at_screen_connect(s)
             arrow("#CB755B", "#C0C0A2"),
             wibox.container.background(wibox.container.margin(wibox.widget { nil, neticon, net.widget, layout = wibox.layout.align.horizontal }, 3, 3), "#C0C0A2"),
             arrow("#C0C0A2", "#777E76"),
-            wibox.container.background(wibox.container.margin(binclock.widget, 4, 8), "#777E76"),
+            wibox.container.background(wibox.container.margin(mytextclock, 4, 8), "#777E76"),
             arrow("#777E76", "alpha"),
             --]]
             s.mylayoutbox,
