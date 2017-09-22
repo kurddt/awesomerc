@@ -6,7 +6,7 @@
 	url = http://git.sysphere.org/vicious
 [submodule "lain"]
 	path = lain
-	url = git://github.com/copycat-killer/lain.git
+	url = https://github.com/kurddt/lain.git
 
 [submodule "freedesktop"]
 	path = freedesktop
