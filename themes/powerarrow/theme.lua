@@ -10,6 +10,8 @@ local gears = require("gears")
 local lain  = require("lain")
 local awful = require("awful")
 local wibox = require("wibox")
+local naughty       = require("naughty")
+local helpers  = require("lain.helpers")
 local os, math, string = os, math, string
 
 local theme                                     = {}
@@ -133,15 +135,20 @@ local mailicon = wibox.widget.imagebox(theme.widget_mail)
 --[[ commented because it needs to be set before use ]]--
 mailicon:buttons(awful.util.table.join(awful.button({ }, 1, function () awful.spawn(mail) end)))
 local mail = lain.widget.imap({
-    timeout  = 180,
+    timeout  = 60,
     server   = "imap.transip.email",
     mail     = "g.lager@innoseis.com",
-    password = function()
-	   local pass =  io.popen("pass Mail/innoseis")
-	   local password = pass:read()
-	   pass:close()
-	   return password
-    end,
+	subfolder = {"AgilIT","innova","innova.basecamp","assembla%20tickets"},
+	password = "Bleach_1989",
+--	password = function()
+--          local pass =  "pass show Mail/innoseis"
+--          local password = ""
+--		  helpers.async(pass, function(f)
+--						   password = f
+--		  end)
+--          return password
+--    end,
+	follow_tag = true,
     settings = function()
         if mailcount > 0 then
             widget:set_text(" " .. mailcount .. " ")
@@ -272,6 +279,7 @@ theme.fs = lain.widget.fs({
 })
 
 -- Battery
+--[[
 local baticon = wibox.widget.imagebox(theme.widget_battery)
 local bat = lain.widget.bat({
     settings = function()
@@ -294,6 +302,7 @@ local bat = lain.widget.bat({
         end
     end
 })
+--]]
 
 -- Net
 local neticon = wibox.widget.imagebox(theme.widget_net)
@@ -341,7 +350,7 @@ function theme.at_screen_connect(s)
     gears.wallpaper.maximized(wallpaper, s, true)
 
     -- Tags
-    awful.tag(awful.util.tagnames, s, awful.layout.layouts)
+    awful.tag(awful.util.tagnames, s, awful.layout.layouts[1])
 
     -- Create a promptbox for each screen
     s.mypromptbox = awful.widget.prompt()
