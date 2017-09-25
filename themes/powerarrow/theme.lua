@@ -96,6 +96,7 @@ theme.titlebar_maximized_button_focus_active    = theme.dir .. "/icons/titlebar/
 theme.titlebar_maximized_button_normal_active   = theme.dir .. "/icons/titlebar/maximized_normal_active.png"
 theme.titlebar_maximized_button_focus_inactive  = theme.dir .. "/icons/titlebar/maximized_focus_inactive.png"
 theme.titlebar_maximized_button_normal_inactive = theme.dir .. "/icons/titlebar/maximized_normal_inactive.png"
+theme.notification_font = "Terminus 9"
 
 local markup = lain.util.markup
 local separators = lain.util.separators
@@ -127,12 +128,14 @@ lain.widget.contrib.task.attach(task, {
 task:buttons(awful.util.table.join(awful.button({}, 1, lain.widget.contrib.task.prompt)))
 
 -- Scissors (xsel copy and paste)
+--[[
 local scissors = wibox.widget.imagebox(theme.widget_scissors)
 scissors:buttons(awful.util.table.join(awful.button({}, 1, function() awful.spawn("xsel | xsel -i -b") end)))
+--]]
 
 -- Mail IMAP check
 local mailicon = wibox.widget.imagebox(theme.widget_mail)
---[[ commented because it needs to be set before use ]]--
+--[[ commented because it needs to be set before use 
 mailicon:buttons(awful.util.table.join(awful.button({ }, 1, function () awful.spawn(mail) end)))
 local mail = lain.widget.imap({
     timeout  = 60,
@@ -159,6 +162,8 @@ local mail = lain.widget.imap({
         end
     end
 })
+
+--]]
 
 -- ALSA volume
 local volicon = wibox.widget.imagebox(theme.widget_vol)
@@ -259,12 +264,13 @@ function(widget, stdout)
     widget:set_markup(markup.font(theme.font, " " .. temps))
 end)
 --]]
--- Coretemp (lain, average)
-local temp = lain.widget.temp({
-    settings = function()
-        widget:set_markup(markup.font(theme.font, " " .. coretemp_now .. "°C "))
-    end
-})
+
+-- Coretemp (lain, average) 
+--local temp = lain.widget.temp({
+--    settings = function()
+--        widget:set_markup(markup.font(theme.font, " " .. coretemp_now .. "°C "))
+--    end
+--})
 --]]
 -- local tempicon = wibox.widget.imagebox(theme.widget_temp)
 
@@ -272,7 +278,7 @@ local temp = lain.widget.temp({
 local fsicon = wibox.widget.imagebox(theme.widget_hdd)
 theme.fs = lain.widget.fs({
     options  = "--exclude-type=tmpfs",
-    notification_preset = { fg = theme.fg_normal, bg = theme.bg_normal, font = "xos4 Terminus 10" },
+    notification_preset = { fg = theme.fg_normal, bg = theme.bg_normal, font = "Terminus 10" },
     settings = function()
         widget:set_markup(markup.font(theme.font, " " .. fs_now.available_gb .. "GB "))
     end
@@ -385,7 +391,7 @@ function theme.at_screen_connect(s)
         { -- Right widgets
             layout = wibox.layout.fixed.horizontal,
             wibox.widget.systray(),
-            wibox.container.margin(scissors, 4, 8),
+            --wibox.container.margin(scissors, 4, 8),
             --[[ using shapes
             pl(wibox.widget { mpdicon, theme.mpd.widget, layout = wibox.layout.align.horizontal }, "#343434"),
             pl(task, "#343434"),

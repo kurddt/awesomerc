@@ -55,14 +55,15 @@ local function run_once(cmd_arr)
     end
 end
 
-run_once({ "xscreensaver" }) -- entries must be comma-separated
+run_once({ "xscreensaver","urxvtd -q -o -f" }) -- entries must be comma-separated
 -- }}}
 
 -- {{{ Variable definitions
 local chosen_theme = "powerarrow"
 local modkey       = "Mod4"
 local altkey       = "Mod1"
-local terminal     = "terminology"
+local terminal     = "urxvtc"
+local xterminal    = "terminology"
 local editor       = os.getenv("EDITOR") or "nano"
 local gui_editor   = "emacs"
 local browser      = "firefox"
@@ -158,8 +159,8 @@ beautiful.init(theme_path)
 -- {{{ Menu
 local myawesomemenu = {
     { "hotkeys", function() return false, hotkeys_popup.show_help end },
-    { "manual", terminal .. " -e man awesome" },
-    { "edit config", string.format("%s -e %s %s", terminal, editor, awesome.conffile) },
+    { "manual", xterminal .. " -e man awesome" },
+    { "edit config", string.format("%s -e %s %s", xterminal, editor, awesome.conffile) },
     { "restart", awesome.restart },
     { "quit", function() awesome.quit() end }
 }
@@ -170,7 +171,7 @@ awful.util.mymainmenu = freedesktop.menu.build({
         -- other triads can be put here
     },
     after = {
-        { "Open terminal", terminal },
+        { "Open terminal", xterminal },
         -- other triads can be put here
     }
 })
@@ -309,7 +310,7 @@ globalkeys = awful.util.table.join(
    -- awful.key({ modkey, "Shift" }, "d", function () lain.util.delete_tag() end),
 
     -- Standard program
-	awful.key({ modkey,           }, "x", function () awful.spawn(terminal) end,
+	awful.key({ modkey,           }, "x", function () awful.spawn(xterminal) end,
 	   		  {description="open a terminal", group="launcher"}),
 	awful.key({ modkey,  }, "e", function () awful.spawn("/work1/glager/toolchain/eclipse/eclipse/eclipse") end,
 	   		  {description="open eclipse", group="launcher"}),
