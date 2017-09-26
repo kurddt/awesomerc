@@ -135,22 +135,14 @@ scissors:buttons(awful.util.table.join(awful.button({}, 1, function() awful.spaw
 
 -- Mail IMAP check
 local mailicon = wibox.widget.imagebox(theme.widget_mail)
---[[ commented because it needs to be set before use 
+
 mailicon:buttons(awful.util.table.join(awful.button({ }, 1, function () awful.spawn(mail) end)))
 local mail = lain.widget.imap({
     timeout  = 60,
     server   = "imap.transip.email",
     mail     = "g.lager@innoseis.com",
 	subfolder = {"AgilIT","innova","innova.basecamp","assembla%20tickets"},
-	password = "Bleach_1989",
---	password = function()
---          local pass =  "pass show Mail/innoseis"
---          local password = ""
---		  helpers.async(pass, function(f)
---						   password = f
---		  end)
---          return password
---    end,
+	password = "pass show Mail/innoseis", 
 	follow_tag = true,
     settings = function()
         if mailcount > 0 then
@@ -163,7 +155,7 @@ local mail = lain.widget.imap({
     end
 })
 
---]]
+
 
 -- ALSA volume
 local volicon = wibox.widget.imagebox(theme.widget_vol)
