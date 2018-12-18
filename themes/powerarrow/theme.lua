@@ -14,11 +14,13 @@ local naughty       = require("naughty")
 local helpers  = require("lain.helpers")
 local os, math, string = os, math, string
 
+local modkey       = "Mod4"
+
 local theme                                     = {}
 theme.dir                                       = os.getenv("HOME") .. "/.config/awesome/themes/powerarrow"
 theme.wallpaper                                 = theme.dir .. "/wall.png"
 theme.font                                      = "xos4 Terminus 9"
-theme.fg_normal                                 = "#FBFBFB"
+theme.fg_normal                                 = "#E3E3E3"
 theme.fg_focus                                  = "#32D6FF"
 theme.fg_urgent                                 = "#C83F11"
 theme.bg_normal                                 = "#222222"
@@ -231,10 +233,21 @@ theme.mpd = lain.widget.mpd({
 })
 
 -- MEM
+function downscale(value)
+   local nb = 1
+   while value > 2048 do
+	  value = value / 1024
+	  nb = nb + 1
+   end
+   return value, nb
+end
+
 local memicon = wibox.widget.imagebox(theme.widget_mem)
 local mem = lain.widget.mem({
-    settings = function()
-        widget:set_markup(markup.font(theme.font, " " .. mem_now.used .. "MB "))
+	  settings = function()
+		 used, nb = downscale(mem_now.used)
+		 local unit = {"MB ", "GB "}
+		 widget:set_markup(markup.font(theme.font, " " .. string.format("%.1f",used) .. unit[nb]))
     end
 })
 
@@ -305,8 +318,11 @@ local bat = lain.widget.bat({
 -- Net
 local neticon = wibox.widget.imagebox(theme.widget_net)
 local net = lain.widget.net({
-    settings = function()
-        widget:set_markup(markup.fontfg(theme.font, "#FEFEFE", " " .. net_now.received .. " ↓↑ " .. net_now.sent .. " "))
+	  settings = function()
+		 local unit = {"B ", "KB ", "MB ", "GB "}
+		 local rcv, nb_rcv = downscale(tonumber(net_now.received))
+		 local sent, nb_sent = downscale(tonumber(net_now.sent))
+		 widget:set_markup(markup.fontfg(theme.font, "#FEFEFE", " " .. string.format("%.1f",rcv) .. unit[nb_rcv].. " ↓↑ " .. string.format("%.1f",sent) .. unit[nb_sent]))
     end
 })
 
